@@ -4,7 +4,7 @@ This script aims to generate a personal color palette with distinguishable
 colors, which are also distinct when converted to grayscale.
 """
 
-from typing import List, Optional
+from typing import Iterable, List
 from colorspacious import cspace_convert
 from colormath.color_objects import LabColor, sRGBColor
 from colormath.color_conversions import convert_color
@@ -26,13 +26,11 @@ class Palette(List[LabColor]):
 
     colors: List[LabColor]
 
-    def __init__(self, colors: ArrayLike):
-        carr = np.asarray(colors)
-        if isinstance(carr[0], str):
-            self.colors = []
-            for c in carr:
-                rgb = sRGBColor.new_from_rgb_hex(c)
-                self.colors.append(convert_color(rgb, LabColor))
+    def __init__(self, colors: Iterable[str]):
+        self.colors = []
+        for c in colors:
+            rgb = sRGBColor.new_from_rgb_hex(c)
+            self.colors.append(convert_color(rgb, LabColor))
 
     def optimize(self):
         """Optimize the colors in terms of luminance."""
@@ -41,17 +39,15 @@ class Palette(List[LabColor]):
             c.lab_l = 80 / len(self.colors) * (i + 1)
 
         # Shuffle them.
-        new_colors = []
-        left, right = 0, len(self.colors) - 1
-        while left <= right:
-            if left == right:
-                new_colors.append(self.colors[left])
-            else:
-                new_colors.append(self.colors[left])
-                new_colors.append(self.colors[right])
-            left += 1
-            right -= 1
-        self.colors = new_colors
+        # n = len(self.colors)
+        # lower = self.colors[:n // 2]
+        # upper = self.colors[n // 2:]
+        # self.colors = []
+        # while len(lower) != 0 or len(upper) != 0:
+        #     if len(lower) != 0:
+        #         self.colors.append(lower.pop())
+        #     if len(upper) != 0:
+        #         self.colors.append(upper.pop())
 
     def show(self, save: bool = False):
         """Showcase the palette."""
@@ -65,7 +61,7 @@ class Palette(List[LabColor]):
         heights = np.asarray([0.8, 0.5, 0.3, 0.3, 0.3])
         gap = 0.1
         y = np.asarray(
-            [- sum(heights[:i]) - heights[i] * 0.5 - gap * i for i in range(5)]
+            [-sum(heights[:i]) - heights[i] * 0.5 - gap * i for i in range(5)]
         )
         meshy = np.asarray(
             [[y[i] - heights[i] / 2, y[i] + heights[i] / 2] for i in range(5)]
@@ -141,6 +137,15 @@ class Palette(List[LabColor]):
 
 
 if __name__ == "__main__":
-    palette = Palette(["#5ba0fa", "#ad5ff5", "#0cf01f", "#f0305f", "#daa520"])
+    colors = [
+        ("RoyalBlue", "#4169e1"),
+        ("OrangeRed", "#ff4500"),
+        ("BlueViolet", "#8a2be2"),
+        ("SeaGreen", "#2e8b57"),
+        ("HotPink", "#ff69b4"),
+        ("GoldenRod", "#daa520"),
+    ]
+    # palette = Palette(["#5ba0fa", "#ff0000", "#ad5ff5", "#0cf01f", "#f0305f", "#daa520"])
+    palette = Palette(map(lambda x: x[1], colors))
     palette.optimize()
     palette.show(save=True)
