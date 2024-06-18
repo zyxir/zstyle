@@ -13,6 +13,14 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 
+def clipped(rgb: sRGBColor) -> sRGBColor:
+    """Clip an RGB color within the [0, 1] range"""
+    rgb.rgb_r = np.clip(rgb.rgb_r, 0, 1)
+    rgb.rgb_g = np.clip(rgb.rgb_g, 0, 1)
+    rgb.rgb_b = np.clip(rgb.rgb_b, 0, 1)
+    return rgb
+
+
 class Palette(List[LabColor]):
     """A palette of colors."""
 
@@ -69,7 +77,7 @@ class Palette(List[LabColor]):
         # Normal colors.
         normal_row = np.zeros((len(self.colors), 3))
         for i, color in enumerate(self.colors):
-            rgb: sRGBColor = convert_color(color, sRGBColor)
+            rgb: sRGBColor = clipped(convert_color(color, sRGBColor))
             normal_row[i, 0] = rgb.rgb_r
             normal_row[i, 1] = rgb.rgb_g
             normal_row[i, 2] = rgb.rgb_b
