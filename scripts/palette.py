@@ -45,23 +45,26 @@ class Palette(List[LabColor]):
             right -= 1
         self.colors = new_colors
 
-    def show(self):
+    def show(self, save: bool = False):
         """Showcase the palette."""
+        plt.rcParams["figure.dpi"] = 200
+        plt.rcParams["savefig.dpi"] = 300
+
         # Compute coordinates.
         dx = 1
         x = np.arange(dx / 2, dx * len(self.colors), dx)
         meshx = np.arange(0, dx * (len(self.colors) + 0.5), dx)
-        heights = np.asarray([0.8, 0.8, 0.5, 0.5, 0.5])
-        gap = 0.2
+        heights = np.asarray([0.8, 0.5, 0.3, 0.3, 0.3])
+        gap = 0.1
         y = np.asarray(
             [- sum(heights[:i]) - heights[i] * 0.5 - gap * i for i in range(5)]
         )
         meshy = np.asarray(
             [[y[i] - heights[i] / 2, y[i] + heights[i] / 2] for i in range(5)]
         )
-        width = dx * len(self.colors) * 2 + 2
-        height = (heights.sum() + gap * 5) * 2
-        _, _ = plt.subplots(figsize=(width, height), layout="tight")
+        width = dx * len(self.colors) + 1
+        height = heights.sum() + gap * 5
+        fig, _ = plt.subplots(figsize=(width, height), layout="tight")
 
         # Normal colors.
         normal_row = np.zeros((len(self.colors), 3))
@@ -73,7 +76,7 @@ class Palette(List[LabColor]):
             plt.annotate(
                 rgb.get_rgb_hex(),
                 (x[i], y[0]),
-                fontsize=20,
+                fontsize=10,
                 color="white",
                 horizontalalignment="center",
                 verticalalignment="center",
@@ -89,7 +92,7 @@ class Palette(List[LabColor]):
             plt.annotate(
                 "$L^* = %d$" % int(np.round(color.lab_l)),
                 (x[i], y[1]),
-                fontsize=20,
+                fontsize=10,
                 color="white",
                 horizontalalignment="center",
                 verticalalignment="center",
@@ -112,9 +115,9 @@ class Palette(List[LabColor]):
             plt.annotate(
                 labels[i],
                 (0, y[i]),
-                (-20, 0),
+                (-10, 0),
                 textcoords="offset points",
-                fontsize=20,
+                fontsize=10,
                 color="black",
                 horizontalalignment="right",
                 verticalalignment="center",
@@ -125,9 +128,11 @@ class Palette(List[LabColor]):
         plt.axis("off")
         plt.yticks(0.5 * y, labels=labels)
         plt.show()
+        if save:
+            fig.savefig("../images/palette.png")
 
 
 if __name__ == "__main__":
     palette = Palette(["#5ba0fa", "#ad5ff5", "#0cf01f", "#f0305f", "#daa520"])
     palette.optimize()
-    palette.show()
+    palette.show(save=True)
